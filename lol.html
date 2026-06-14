@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <title>Directorio de Universidades en México</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet"> 
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.0/css/all.min.css" rel="stylesheet">
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Raleway', sans-serif;
+            background-color: #f4f7f6;
+            color: #444;
+        }
+        
+        /* Encabezado */
+        .hero-header {
+            background: linear-gradient(rgba(34, 36, 41, 0.8), rgba(34, 36, 41, 0.8)), url('https://images.pexels.com/photos/207691/pexels-photo-207691.jpeg?auto=compress&cs=tinysrgb&w=1920') center center no-repeat;
+            background-size: cover;
+            color: white;
+            padding: 120px 0;
+            text-align: center;
+            margin-bottom: 20px; /* Reducido para dar espacio al contador */
+        }
+
+        .hero-header h1 {
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        /* Tarjetas */
+        .uni-card {
+            background: #ffffff;
+            border-radius: 12px;
+            border: none;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            margin-bottom: 50px;
+            overflow: hidden;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .uni-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        /* Imagen Superior */
+        .uni-img-wrapper {
+            position: relative;
+        }
+
+        .uni-photo {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            cursor: zoom-in; /* NUEVO: Indicador de lightbox */
+            transition: opacity 0.3s;
+        }
+        
+        .uni-photo:hover {
+            opacity: 0.85; /* NUEVO: Efecto hover en imágenes */
+        }
+
+        .uni-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 0.9rem;
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-weight: 600;
+        }
+
+        .badge-publica { background-color: #28a745; color: white; }
+        .badge-privada { background-color: #007bff; color: white; }
+
+        /* Cuerpo de la Tarjeta */
+        .uni-body {
+            padding: 30px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Cabecera interna (Logo + Título) */
+        .uni-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+
+        .uni-logo {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            margin-right: 20px;
+        }
+
+        .uni-title-box h3 {
+            font-weight: 700;
+            font-size: 1.4rem;
+            margin: 0;
+            color: #2c3e50;
+        }
+
+        .uni-title-box p {
+            margin: 0;
+            font-size: 0.85rem;
+            color: #777;
+            font-weight: 500;
+        }
+
+        /* Información */
+        .uni-info {
+            flex-grow: 1;
+        }
+
+        .uni-info p {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #555;
+        }
+
+        .uni-info i {
+            width: 25px;
+            text-align: center;
+            font-size: 1.1rem;
+            margin-right: 10px;
+        }
+
+        .icon-location { color: #dc3545; }
+        .icon-cost { color: #ffc107; }
+        .icon-info { color: #17a2b8; }
+
+        /* Mapa */
+        .map-container {
+            width: 100%;
+            height: 250px;
+            background: #eee;
+        }
+
+        .map-container iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        /* =========================================
+           NUEVOS ESTILOS AGREGADOS (FUNCIONES)
+           ========================================= */
+
+        /* Efecto Onda (Ripple) */
+        .ripple-btn {
+            position: relative;
+            overflow: hidden;
+            transform: translate3d(0, 0, 0);
+            margin-top: auto; /* Empuja el botón al fondo de la tarjeta */
+            width: 100%;
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            outline: none !important;
+            transition: background-color 0.3s;
+        }
+
+        .ripple-btn:hover {
+            background-color: #1a252f;
+            color: white;
+        }
+
+        .ripple-btn::after {
+            content: "";
+            display: block;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            background-image: radial-gradient(circle, #fff 10%, transparent 10.01%);
+            background-repeat: no-repeat;
+            background-position: 50%;
+            transform: scale(10, 10);
+            opacity: 0;
+            transition: transform .5s, opacity 1s;
+        }
+
+        .ripple-btn:active::after {
+            transform: scale(0, 0);
+            opacity: .3;
+            transition: 0s;
+        }
+
+        /* Lightbox (Galería con Zoom) */
+        .lightbox-overlay {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            padding-top: 5%;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.9);
+            overflow: auto;
+        }
+
+        .lightbox-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            transition: transform 0.3s ease; /* Efecto Zoom */
+        }
+
+        .lightbox-content:hover {
+            transform: scale(1.05); /* Zoom al pasar el mouse en el lightbox */
+        }
+
+        .close-lightbox {
+            position: absolute;
+            top: 20px;
+            right: 35px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-lightbox:hover {
+            color: #ffc107;
+        }
+
+        /* Contadores Numéricos */
+        .counter-section {
+            padding: 30px 0 60px 0;
+        }
+        .counter-number {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .counter-text {
+            color: #777;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+        <div class="container">
+            <a class="navbar-brand font-weight-bold" href="#"><i class="fas fa-graduation-cap"></i> DirUni</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavDropdown">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item active">
+                        <a class="nav-link" href="#">Inicio <span class="sr-only">(current)</span></a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#directorio">Directorio</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Filtrar Categorías
+                        </a>
+                        <div class="dropdown-menu shadow" aria-labelledby="navbarDropdownMenuLink">
+                            <a class="dropdown-item" href="#">Universidades Públicas</a>
+                            <a class="dropdown-item" href="#">Universidades Privadas</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Ver mapa nacional</a>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="hero-header">
+        <div class="container">
+            <h1 class="display-4 text-white mb-3">Directorio Universitario</h1>
+            <p class="lead">Explora ubicación, costos y datos relevantes de las instituciones de educación superior en México.</p>
+        </div>
+    </div>
+
+    <div class="container counter-section">
+        <div class="row text-center">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="counter-number" data-target="12">0</div>
+                <div class="counter-text">Universidades</div>
+            </div>
+            <div class="col-md-4 mb-4 mb-md-0">
+                <div class="counter-number" data-target="9">0</div>
+                <div class="counter-text">Estados Cubiertos</div>
+            </div>
+            <div class="col-md-4">
+                <div class="counter-number" data-target="1200000">0</div>
+                <div class="counter-text">Estudiantes (Aprox)</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="directorio">
+        <div class="row">
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://www.gaceta.unam.mx/wp-content/uploads/2022/11/221107-Cult3-f2-70-aniversario-campus-central-CU.jpg" class="uni-photo" alt="UNAM">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/c/ca/Escudo-UNAM-escalable.svg" class="uni-logo" alt="Logo UNAM">
+                            <div class="uni-title-box">
+                                <h3>UNAM</h3>
+                                <p>Universidad Nacional Autónoma de México</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> CDMX (Ciudad Universitaria) y FES.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Prácticamente gratuita (aprox. $20 MXN anuales).</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Es la universidad más grande de América Latina, destacada mundialmente en ciencias exactas, humanidades y artes.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=UNAM+Ciudad+Universitaria+CDMX&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://nivelate.mx/images/campus-ipn.jpg" class="uni-photo" alt="IPN">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://i0.wp.com/sociedadtecnologiaydeontologia.wordpress.com/wp-content/uploads/2019/01/logotipo_ipn.png?resize=1231%2C1319&ssl=1" class="uni-logo" alt="Logo IPN">
+                            <div class="uni-title-box">
+                                <h3>IPN</h3>
+                                <p>Instituto Politécnico Nacional</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> CDMX (Zacatenco, Casco de Santo Tomás) y sedes foráneas.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Aportación voluntaria (aprox. $400 MXN semestrales).</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Institución líder y referente nacional en ingeniería, física, matemáticas y desarrollo tecnológico.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=IPN+Zacatenco+CDMX&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://www.uv.mx/apps/agenda/Files/Index/10061" class="uni-photo" alt="UV">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://e7.pngegg.com/pngimages/534/788/png-clipart-universidad-veracruzana-direccion-general-editorial-de-publicaciones-coatzacoalcos-university-of-valencia-flor-de-lis-leaf-logo.png" class="uni-logo" alt="Logo UV">
+                            <div class="uni-title-box">
+                                <h3>UV</h3>
+                                <p>Universidad Veracruzana</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> Veracruz (Xalapa, Veracruz-Boca del Río, Orizaba, etc.).</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Inscripción / Patronato (aprox. $2,000 - $3,500 MXN).</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Muy reconocida por sus áreas artísticas, música, medicina y ciencias biológico-agropecuarias.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=Universidad+Veracruzana+Xalapa&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/256490/pexels-photo-256490.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="UDLAP">
+                        <span class="uni-badge badge-privada">Privada</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://ulibros.com/publisher/ilogo/5a2d2f9c29b2605bc4176f8068681a58" class="uni-logo" alt="Logo UDLAP">
+                            <div class="uni-title-box">
+                                <h3>UDLAP</h3>
+                                <p>Universidad de las Américas Puebla</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> San Andrés Cholula, Puebla.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Aprox. $150,000 - $180,000 MXN por semestre.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Reconocida por su enfoque internacional, excelentes instalaciones deportivas y modelo residencial.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=UDLAP+Cholula+Puebla&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://tec.mx/sites/default/files/styles/16_9_campus/public/repositorio/Campus/Guadalajara/JA/campus-guadalajara-tec-monterrey.jpg.webp?itok=u4bkZ24x" class="uni-photo" alt="ITESM">
+                        <span class="uni-badge badge-privada">Privada</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fantonioquirozdesign.com%2Fudlap&ved=0CBYQjRxqFwoTCPDTzdf81JQDFQAAAAAdAAAAABAg&opi=89978449" class="uni-logo" alt="Logo ITESM">
+                            <div class="uni-title-box">
+                                <h3>Tec de Monterrey</h3>
+                                <p>Instituto Tecnológico y de Estudios Superiores de Monterrey</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> Monterrey (Campus principal) y sedes en todo el país.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Aprox. $130,000 - $160,000 MXN por semestre.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Enfoque fuerte en negocios, emprendimiento e innovación. Ecosistema de networking de alto nivel.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=Tec+de+Monterrey+Campus+Monterrey&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://lh4.googleusercontent.com/proxy/5Mw2c7mEPfzU9RNcf21hGSiOJEvLRg26nyGZtaLtOl6RBc29MoTBeY1Bku6ERobqndn3KjIR5PpCBtKZZeuLoDxsPPQlEcVnzllDte5ppAmZjJ4G" class="uni-photo" alt="UACH">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://www.google.com/url?sa=t&source=web&rct=j&url=https%3A%2F%2Fmanuelgallardo.mx%2Fcollections%2Ftecnologico-de-monterrey&ved=0CBYQjRxqFwoTCPjygLr81JQDFQAAAAAdAAAAABAF&opi=89978449" class="uni-logo" alt="Logo UACH">
+                            <div class="uni-title-box">
+                                <h3>UACH</h3>
+                                <p>Universidad Autónoma de Chihuahua</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> Chihuahua, Chihuahua.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Inscripción aprox. $4,000 MXN por semestre.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Destaca en carreras de ingeniería, ciencias agrícolas, ganadería y ciencias políticas.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=Universidad+Autonoma+de+Chihuahua&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/159844/cellular-education-classroom-159844.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="UAM">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://www.comunicacionsocial.uam.mx/identidaduam/images/variacion7.jpg" class="uni-logo" alt="Logo UAM">
+                            <div class="uni-title-box">
+                                <h3>UAM</h3>
+                                <p>Universidad Autónoma Metropolitana</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> CDMX (Xochimilco, Azcapotzalco, Iztapalapa, Cuajimalpa).</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Cuota trimestral muy accesible (aprox. $128 MXN).</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Fuerte en diseño, arquitectura y ciencias biológicas. Reconocida por su sistema modular.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=UAM+Xochimilco+CDMX&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/207684/pexels-photo-207684.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="UANL">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://arquitectura.uanl.mx/wp-content/uploads/2022/01/Uanl-color-sim-con-fondo.jpg" class="uni-logo" alt="Logo UANL">
+                            <div class="uni-title-box">
+                                <h3>UANL</h3>
+                                <p>Universidad Autónoma de Nuevo León</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> San Nicolás de los Garza / Monterrey.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Cuota interna aprox. $2,500 - $5,000 MXN semestrales.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Tercera universidad más grande de México, gran pilar educativo e industrial en el norte del país.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=UANL+Ciudad+Universitaria+Monterrey&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/1181298/pexels-photo-1181298.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="UdeG">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5f/Escudo_UdeG.svg/960px-Escudo_UdeG.svg.png" class="uni-logo" alt="Logo UdeG">
+                            <div class="uni-title-box">
+                                <h3>UdeG</h3>
+                                <p>Universidad de Guadalajara</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> Guadalajara, Jalisco y Red Universitaria.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Aportación voluntaria (aprox. $1,000 MXN semestrales).</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Segunda universidad pública más importante de México. Gran prestigio en medicina, humanidades y artes.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=Universidad+de+Guadalajara+Rectoria&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/267507/pexels-photo-267507.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="ITAM">
+                        <span class="uni-badge badge-privada">Privada</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT2pvc8LyXmEC7gPT0ynNAv08bwOQFGDCiRVg&s" class="uni-logo" alt="Logo ITAM">
+                            <div class="uni-title-box">
+                                <h3>ITAM</h3>
+                                <p>Instituto Tecnológico Autónomo de México</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> CDMX (San Ángel / Río Hondo).</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Aprox. $120,000 - $160,000 MXN por semestre.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> El más alto prestigio en Economía, Finanzas, Actuaría y Ciencias Políticas. Altamente riguroso.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=ITAM+Rio+Hondo+CDMX&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/207692/pexels-photo-207692.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="BUAP">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/a/a7/Logo_de_la_BUAP.svg" class="uni-logo" alt="Logo BUAP">
+                            <div class="uni-title-box">
+                                <h3>BUAP</h3>
+                                <p>Benemérita Universidad Autónoma de Puebla</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> Puebla, Puebla (Ciudad Universitaria).</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Inscripción anual aprox. $700 - $2,500 MXN.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Institución macro en el centro de México. Muy fuerte en ciencias exactas e investigación.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=BUAP+Ciudad+Universitaria+Puebla&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6 col-md-12">
+                <div class="uni-card">
+                    <div class="uni-img-wrapper">
+                        <img src="https://images.pexels.com/photos/137024/pexels-photo-137024.jpeg?auto=compress&cs=tinysrgb&w=800" class="uni-photo" alt="UAEMex">
+                        <span class="uni-badge badge-publica">Pública</span>
+                    </div>
+                    <div class="uni-body">
+                        <div class="uni-header">
+                            <img src="https://upload.wikimedia.org/wikipedia/commons/1/1a/Logo_de_la_UAEMex.svg" class="uni-logo" alt="Logo UAEMex">
+                            <div class="uni-title-box">
+                                <h3>UAEMex</h3>
+                                <p>Universidad Autónoma del Estado de México</p>
+                            </div>
+                        </div>
+                        <div class="uni-info">
+                            <p><i class="fas fa-map-marker-alt icon-location"></i> <strong>Ubicación:</strong> Toluca, Estado de México.</p>
+                            <p><i class="fas fa-coins icon-cost"></i> <strong>Costo:</strong> Inscripción semestral aprox. $2,500 - $3,500 MXN.</p>
+                            <p><i class="fas fa-info-circle icon-info"></i> <strong>Dato:</strong> Amplia oferta educativa, gran fomento al deporte y fuerte presencia en la zona metropolitana del Valle de Toluca.</p>
+                        </div>
+                    </div>
+                    <div class="map-container">
+                        <iframe src="https://maps.google.com/maps?q=UAEMex+Toluca&output=embed" allowfullscreen></iframe>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <div class="container-fluid bg-dark text-white py-5 mt-5">
+        <p class="m-0 text-center" style="font-size: 0.9rem; letter-spacing: 1px;">
+            © 2026 Directorio Universitario. Diseñado para ser limpio, organizado y moderno.
+        </p>
+    </div>
+    <div class="container-fluid bg-dark text-white-50 py-4 px-sm-3 px-md-5" style="border-top: 1px solid rgba(256, 256, 256, .1);">
+        <div class="row">
+            <div class="col-md-12 text-center">
+                <p class="m-0">Desarrollado por:</p>
+                <p class="m-0 font-weight-bold text-white">
+                    José Ángel López Negrete | Eugenia Rodríguez Rivera | Johan Jafeth Vázquez Severino
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="infoModal" tabindex="-1" role="dialog" aria-labelledby="modalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title" id="modalLabel">Información de la Universidad</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p>Aquí se pueden añadir más detalles específicos dinámicos, enlazar a un plan de estudios o formulario de contacto en la siguiente fase de desarrollo.</p>
+                    <p class="text-muted"><small>Visualización interactiva cargada exitosamente.</small></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary">Visitar Sitio Oficial</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="lightbox" class="lightbox-overlay">
+        <span class="close-lightbox">&times;</span>
+        <img class="lightbox-content" id="lightbox-img">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            
+            // 1. GENERACIÓN DINÁMICA DE BOTONES RIPPLE Y MODAL
+            // Se inyecta al final de 'uni-body' para no alterar el HTML original
+            const uniBodies = document.querySelectorAll('.uni-body');
+            
+            uniBodies.forEach(body => {
+                const btn = document.createElement('button');
+                btn.className = 'ripple-btn mt-4';
+                btn.setAttribute('data-toggle', 'modal');
+                btn.setAttribute('data-target', '#infoModal');
+                btn.innerHTML = 'Ver más detalles <i class="fas fa-arrow-right ml-2"></i>';
+                
+                // Actualizar título del modal al hacer clic en el botón específico
+                btn.addEventListener('click', () => {
+                    const uniTitle = body.querySelector('.uni-title-box h3').innerText;
+                    document.getElementById('modalLabel').innerText = 'Explorando: ' + uniTitle;
+                });
+                
+                body.appendChild(btn);
+            });
+
+            // 2. CONTADOR NUMÉRICO ANIMADO
+            const counters = document.querySelectorAll('.counter-number');
+            const speed = 100; // Cuanto más bajo, más rápido
+
+            counters.forEach(counter => {
+                const updateCount = () => {
+                    const target = +counter.getAttribute('data-target');
+                    const count = +counter.innerText.replace(/,/g, '');
+                    const inc = target / speed;
+
+                    if (count < target) {
+                        counter.innerText = Math.ceil(count + inc).toLocaleString(); // Formato con comas
+                        setTimeout(updateCount, 20);
+                    } else {
+                        counter.innerText = target.toLocaleString(); 
+                    }
+                };
+                updateCount();
+            });
+
+            // 3. GALERÍA LIGHTBOX CON ZOOM PARA LAS IMÁGENES
+            const lightbox = document.getElementById('lightbox');
+            const lightboxImg = document.getElementById('lightbox-img');
+            const closeLightbox = document.querySelector('.close-lightbox');
+            const uniPhotos = document.querySelectorAll('.uni-photo');
+
+            // Abrir lightbox al hacer clic en la imagen de la universidad
+            uniPhotos.forEach(photo => {
+                photo.addEventListener('click', () => {
+                    lightbox.style.display = 'block';
+                    lightboxImg.src = photo.src;
+                });
+            });
+
+            // Cerrar lightbox con la "X"
+            closeLightbox.addEventListener('click', () => {
+                lightbox.style.display = 'none';
+            });
+
+            // Cerrar lightbox si se hace clic fuera de la imagen
+            lightbox.addEventListener('click', (e) => {
+                if (e.target !== lightboxImg) {
+                    lightbox.style.display = 'none';
+                }
+            });
+
+            // Cerrar lightbox con la tecla "Esc"
+            document.addEventListener('keydown', (e) => {
+                if (e.key === "Escape" && lightbox.style.display === 'block') {
+                    lightbox.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
